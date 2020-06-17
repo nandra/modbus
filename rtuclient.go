@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"github.com/brian-armstrong/gpio"
 )
 
 const (
@@ -121,9 +123,12 @@ func (mb *rtuSerialTransporter) Send(aduRequest []byte) (aduResponse []byte, err
 
 	// Send the request
 	mb.serialPort.logf("modbus: sending % x\n", aduRequest)
+	pin := gpio.NewOutput(78, true)
 	if _, err = mb.port.Write(aduRequest); err != nil {
 		return
 	}
+	time.Sleep(20*time.Millisecond)
+	pin.Low()
 	function := aduRequest[1]
 	functionFail := aduRequest[1] & 0x80
 	bytesToRead := calculateResponseLength(aduRequest)
